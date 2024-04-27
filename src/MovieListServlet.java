@@ -53,27 +53,12 @@ public class MovieListServlet extends HttpServlet {
             // Get a connection from dataSource
 
             // Construct a query with parameter represented by "?"
-            String query = "SELECT \n" +
-                    "m.title,\n" +
-                    "m.year,\n" +
-                    "m.director,\n" +
-                    "GROUP_CONCAT(DISTINCT g.name ORDER BY g.genreId) AS genres,\n" +
-                    "GROUP_CONCAT(DISTINCT s.name ORDER BY s.starId) AS stars,\n" +
-                    "r.rating\n" +
-                    "FROM \n" +
-                    "movies m\n" +
-                    "LEFT JOIN \n" +
-                    "genres_gitin_movies gim ON m.id = gim.movieId\n" +
-                    "LEFT JOIN \n" +
-                    "genres g ON gim.genreId = g.id\n" +
-                    "LEFT JOIN \n" +
-                    "stars_in_movies sim ON m.id = sim.movieId\n" +
-                    "LEFT JOIN \n" +
-                    "stars s ON sim.starId = s.id\n" +
-                    "LEFT JOIN \n" +
-                    "ratings r ON m.id = r.movieId\n" +
-                    "GROUP BY \n" +
-                    "m.title, m.year, m.director, r.rating;";
+            String query = "SELECT m.title, m.year, m.director,\n" +
+                    "SUBSTRING_INDEX(GROUP_CONCAT(g.name ORDER BY g.name SEPARATOR ', '), ',', 3) AS genres\n" +
+                    "FROM movies m\n" +
+                    "JOIN genres_in_movies gim ON m.id = gim.movieId\n" +
+                    "JOIN genres g ON gim.genreId = g.id\n" +
+                    "GROUP BY m.id, m.title, m.year, m.director;\n";
 
             // Declare our statement
             PreparedStatement statement = conn.prepareStatement(query);
